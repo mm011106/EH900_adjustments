@@ -85,7 +85,7 @@ void loop() {
 
           uint32_t v_sensor = (uint32_t)round((float_t)gain_23 * RL);
           Serial.print("Vsensor[uV] should be :"); Serial.println(v_sensor);
-          
+
           float_t gain_01_comp = ((float_t)v_sensor/(float_t)gain_01);
           Serial.print("ADC 0-1 comp :"); Serial.println(gain_01_comp, 8);
 
@@ -171,9 +171,11 @@ void adjust_current(void){
     meas_unit.read_current((uint16_t)offset_23);
     command = incomming_command();
   }
+  // DMMでの電流読み値をここで入力してもらえば、ads_err_comp_diff_2_3補正値を設定できる
   meas_unit.currentOff();
   Serial.print("Current setting :");Serial.println(current);
   current_set = current;
+  // Serial.println("input current readings on DMM:");
   level_meter.setCurrentSetting(current_set);
   return;
 }
