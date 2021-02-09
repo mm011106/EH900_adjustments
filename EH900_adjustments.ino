@@ -1,4 +1,20 @@
-//
+
+/**
+* @file EH900_adjustments.ino
+* @brief EH900の計測モジュール調整に用いる
+* @author miyamoto
+* @date 2021/2/9
+* @version 1.0_release
+* @details 
+*   ADコンバータのオフセット、全体としての電圧計測利得の調整、電流設定値の調整
+*   を行い、その結果をFRAMに記録する。
+*   電流計測は、実際に流れている電流を計測器(DMM)で計測し、その値をリファレンスとして補正値を決める。
+*   電圧利得測定は、既知の抵抗（113.74Ω）と同じく既知（調整済み）の電流値から
+*   リファレンスとなる電圧を計算し、その値と実測値の比率から補正値を求める。
+* 
+* @note VSPで通信することを前提としているので、PC側にシリアルコンソール必要
+*   115200bps
+*/
 
 
 #include <Arduino.h>
@@ -84,6 +100,7 @@ void loop() {
     
     case (int)'g':
       Serial.println("Gain measure..");
+      Serial.print(" Set R=");Serial.print(RL);Serial.println(" ohm, ");
       Serial.println(" \'g\' if ready to start.");
       if( incomming_command() == 'g'){
         Serial.println("  ....measureing");
@@ -110,7 +127,10 @@ void loop() {
     
     case (int)'c':
       Serial.println("Current adjust..");
-      adjust_current();
+      Serial.println(" Set DMM(ammeter) in the circuit, \'g\' if ready to start.");
+      if( incomming_command() == 'g'){
+        adjust_current();
+      }
     break;
 
     case (int)'w':
@@ -196,7 +216,7 @@ void adjust_current(void){
 
   float_t value =  0.0;
   while (value < 74.0 || 76.0 < value){
-    Serial.print(" Input current readings[mA] on DMM:");
+    Serial.print(" Input DMM(ammeter) readings[mA] :");
     while(Serial.available()==0){delay(100);}
     String buf = Serial.readStringUntil(10);
     Serial.println(buf);
