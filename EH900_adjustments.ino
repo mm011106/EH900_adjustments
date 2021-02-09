@@ -22,7 +22,7 @@ constexpr float RL = 113.74;
 
 void setup() {
   // start serial port at 9600 bps and wait for port to open:
-  Serial.begin(9600);
+  Serial.begin(115200);
   while (!Serial) {
     delay(100); // wait for serial port to connect. Needed for native USB port only
   }
@@ -63,15 +63,21 @@ void loop() {
   switch (inByte){
     case (int)'o':
       Serial.println("Offset measure..");
-      Serial.println(" \'g\' if ready to start.");
+      Serial.println(" Set R=0,  \'g\' if ready to start.");
       if( incomming_command() == 'g'){
         Serial.println("  ....measureing");
-        offset_01 = meas_unit.read_voltage(0,true);
-        offset_23 = meas_unit.read_voltage(1,true);
+        meas_unit.currentOn();
+        delay(1000);
+        offset_01 = meas_unit.read_voltage(0,true);//戻り値：LSBカウント
+        // offset_23 = meas_unit.read_voltage(1,true);
         Serial.print("  offset_01: ");Serial.println(offset_01);
-        Serial.print("  offset_23: ");Serial.println(offset_23); 
+        // Serial.print("  offset_23: ");Serial.println(offset_23); 
+        Serial.print("  offset_23: ");Serial.println(0); 
+        meas_unit.currentOff();
+
         level_meter.setAdcOfsComp01((uint16_t)offset_01);
-        level_meter.setAdcOfsComp23((uint16_t)offset_23);
+        // level_meter.setAdcOfsComp23((uint16_t)offset_23);
+        level_meter.setAdcOfsComp23(0);
         Serial.println("  ....fine. ");
       }
     break;
@@ -83,7 +89,7 @@ void loop() {
         Serial.println("  ....measureing");
         meas_unit.currentOn();
         delay(1000);
-        uint32_t gain_01 = meas_unit.read_voltage(0,false);
+        uint32_t gain_01 = meas_unit.read_voltage(0,false);// 戻り値：Voltage オフセット補正済み
         Serial.print("  gain_01[uV]: ");Serial.println(gain_01);
         
         uint32_t gain_23 = meas_unit.read_current((uint16_t)offset_23)*gain_comp_23;

@@ -365,7 +365,10 @@ uint32_t Measurement::read_voltage(const uint16_t adc_channel, const boolean mod
     if (mode) {
         return round(results/(float)avg);
     } else {
-        return round(results/(float)avg * adc_gain_coeff * ATTENUATOR_COEFF);
+        Serial.print("Offset compensate: ");Serial.println(LevelMeter->getAdcOfsComp01());
+        Serial.print("Result in [microVolt]=");
+        Serial.println((results/(float)avg - (float)LevelMeter->getAdcOfsComp01()) * adc_gain_coeff * ATTENUATOR_COEFF);
+        return round((results/(float)avg - (float)LevelMeter->getAdcOfsComp01()) * adc_gain_coeff * ATTENUATOR_COEFF);
     }
     
     
@@ -406,7 +409,7 @@ uint32_t Measurement::read_current(const uint16_t channel_23_offset){  // return
 
     Serial.print("reading conveted to Current Out(2-3):");
     // results = results / (float)avg * coeff * ADC_ERR_COMPENSATION; // reading in microVolt
-    results = results / (float)avg * adc_gain_coeff * LevelMeter->getAdcErrComp23(); // reading in microVolt
+    results = results / (float)avg * adc_gain_coeff ; // reading in microVolt
     results = results / (float)CURRENT_MEASURE_COEFF; // convert voltage to current.
     Serial.print(results);
     Serial.println(" uA: Fin. --");
