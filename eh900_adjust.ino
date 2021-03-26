@@ -363,12 +363,13 @@ uint32_t Measurement::read_voltage(const uint16_t adc_channel, const boolean mod
     // Serial.print(" "); Serial.print(results); Serial.println(" uV: Fin. --");
 
     if (mode) {
-        return round(results/(float)avg);
+        Serial.print("Measured Offset in LSB =");Serial.println( (int) round(results/(float)avg));
+        return (int) round(results/(float)avg);
     } else {
         Serial.print("Offset compensate: ");Serial.println(LevelMeter->getAdcOfsComp01());
         Serial.print("Result in [microVolt]=");
         Serial.println((results/(float)avg - (float)LevelMeter->getAdcOfsComp01()) * adc_gain_coeff * ATTENUATOR_COEFF);
-        return round((results/(float)avg - (float)LevelMeter->getAdcOfsComp01()) * adc_gain_coeff * ATTENUATOR_COEFF);
+        return (int) round((results/(float)avg - (float)LevelMeter->getAdcOfsComp01()) * adc_gain_coeff * ATTENUATOR_COEFF);
     }
     
     

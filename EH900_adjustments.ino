@@ -26,8 +26,8 @@ Measurement meas_unit(&level_meter);
 
 String command = "";
 
-uint32_t offset_01 = 0;
-uint32_t offset_23 = 0;
+int32_t offset_01 = 0;
+int32_t offset_23 = 0;
 float_t gain_comp_01 = 0.0;
 float_t gain_comp_23 = 0.0;
 uint16_t current_set = 750;
