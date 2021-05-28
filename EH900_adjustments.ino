@@ -61,14 +61,15 @@ void setup() {
   level_meter.setAdcErrComp23(1.0);
   level_meter.setAdcOfsComp01(0);
   level_meter.setAdcOfsComp23(0);
-
+  level_meter.setVmonOffset(0);
+  
   Serial.println("--- EH-900 Adjustment software --- ");
 }
 
 void loop() {
   // if we get a valid byte, read analog ins:
 
-  Serial.println("Wait for command [o|c|g|w]:");
+  Serial.println("Wait for command [o|c|g|v|w]:");
   while (!Serial.available()){delay(100);}
 
   // get incoming byte:
@@ -227,5 +228,24 @@ void adjust_current(void){
   Serial.print("ADC 2-3 comp :");Serial.println(gain_comp_23,6);
   level_meter.setAdcErrComp23(gain_comp_23);
   level_meter.setCurrentSetting(current_set);
+  return;
+}
+
+void meas_vmon_ofs(void){
+  
+  meas_unit.setVmon(100); // set to 0.1V (= 10%)
+
+  float_t value =  0.0;
+  while ( value < 0.09 || 0.11 < value){
+    Serial.print(" Input DMM(volt-meter) readings[in Volt] :");
+    while(Serial.available()==0){delay(100);}
+    String buf = Serial.readStringUntil(10);
+    Serial.println(buf);
+    value = buf.toFloat();
+  }
+
+  level_meter.setVmonOffset((int16_t)((value-0.10)*26214.0));
+
+  meas_unit.setVmon(100);
   return;
 }
