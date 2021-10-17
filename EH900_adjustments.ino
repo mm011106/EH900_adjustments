@@ -5,12 +5,22 @@
 * @author miyamoto
 * @date 2021/2/9
 * @version 1.0_release
+
+* @date 2021/10/17
+* @version 1.1_release
+
 * @details 
 *   ADコンバータのオフセット、全体としての電圧計測利得の調整、電流設定値の調整
 *   を行い、その結果をFRAMに記録する。
 *   電流計測は、実際に流れている電流を計測器(DMM)で計測し、その値をリファレンスとして補正値を決める。
-*   電圧利得測定は、既知の抵抗（113.74Ω）と同じく既知（調整済み）の電流値から
+*   電圧利得測定は、既知の抵抗（113.74Ω）と、既知（調整済み）の電流値から
 *   リファレンスとなる電圧を計算し、その値と実測値の比率から補正値を求める。
+*   
+*   1.1:
+*     VMON出力用DACのオフセット調整を追加　
+*       0.1V出力設定で実際の値を入力してもらい、オフセット(LSB)を求める
+* 
+* 
 * 
 * @note VSPで通信することを前提としているので、PC側にシリアルコンソール必要
 *   115200bps
@@ -45,9 +55,9 @@ void setup() {
   Serial.println("INIT:--");
   Serial.print("Memory : "); 
   if (level_meter.init()){
-    Serial.print(" -- OK ");
+    Serial.println(" -- OK ");
   } else {
-    Serial.print(" -- Fail..");
+    Serial.println(" -- Fail..");
   };
 
   Serial.print("Meas. Unit : "); 
@@ -134,6 +144,14 @@ void loop() {
       }
     break;
 
+    case (int)'v':
+      Serial.println("Vmon Offset voltage ..");
+      Serial.println(" Attach DMM(dc V) to Vmon output , \'g\' if ready to start.");
+      if( incomming_command() == 'g'){
+        meas_vmon_ofs();
+      }
+    break;
+
     case (int)'w':
       Serial.println("Save to Memory");
       level_meter.setTimerPeriod(600);
@@ -147,7 +165,7 @@ void loop() {
       Serial.print("AD OFFSET Comp 23: "); Serial.println(level_meter.getAdcOfsComp23());
       Serial.print("Current Source setting: "); Serial.println(level_meter.getCurrentSetting());
       
-      Serial.print(" \'g\' for store the parameter, or quit without them.:");
+      Serial.print(" \'g\' for store the parameter, \'q\' for quit without update.:");
 
       if( incomming_command() == 'g'){
         Serial.println("");
@@ -171,6 +189,7 @@ void loop() {
     break;
   }
   delay(100);
+  serial.println();
 }
 
 char incomming_command(void){
@@ -233,7 +252,7 @@ void adjust_current(void){
 
 void meas_vmon_ofs(void){
   
-  meas_unit.setVmon(100); // set to 0.1V (= 10%)
+  meas_unit.setVmon(0); // set to 0.1V (= 0%)
 
   float_t value =  0.0;
   while ( value < 0.09 || 0.11 < value){
@@ -246,6 +265,6 @@ void meas_vmon_ofs(void){
 
   level_meter.setVmonOffset((int16_t)((value-0.10)*26214.0));
 
-  meas_unit.setVmon(100);
+  meas_unit.setVmon(0);  //confirm offset corrected VMON output
   return;
 }

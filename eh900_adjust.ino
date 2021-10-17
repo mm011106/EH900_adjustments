@@ -92,6 +92,8 @@ boolean Measurement::init(void){
     Serial.print("AD OFFSET Comp 23: "); Serial.println(LevelMeter->getAdcOfsComp23());
 
     Serial.print("Current Sorce setting: "); Serial.println(LevelMeter->getCurrentSetting());
+    Serial.print("Vmon Offset [LSB]: "); Serial.println(LevelMeter->getVmonOffset());
+
 
 
     // 電流源設定用DAC  初期化
