@@ -158,12 +158,14 @@ void loop() {
       level_meter.setSensorLength(20);
       level_meter.setLiquidLevel(0);
       level_meter.setMode(Timer);
-    
+      Serial.println("Please confirm following adjustment parameters");
+
       Serial.print("AD Error Comp 01: "); Serial.println(level_meter.getAdcErrComp01(),8);
       Serial.print("AD Error Comp 23: "); Serial.println(level_meter.getAdcErrComp23(),8);
       Serial.print("AD OFFSET Comp 01: "); Serial.println(level_meter.getAdcOfsComp01());
       Serial.print("AD OFFSET Comp 23: "); Serial.println(level_meter.getAdcOfsComp23());
       Serial.print("Current Source setting: "); Serial.println(level_meter.getCurrentSetting());
+      Serial.print("Vmon DAC offset : "); Serial.println(level_meter.getVmonOffset());
       
       Serial.print(" \'g\' for store the parameter, \'q\' for quit without update.:");
 
@@ -179,6 +181,8 @@ void loop() {
         Serial.print("AD OFFSET Comp 01: "); Serial.println(level_meter.getAdcOfsComp01());
         Serial.print("AD OFFSET Comp 23: "); Serial.println(level_meter.getAdcOfsComp23());
         Serial.print("Current Source setting: "); Serial.println(level_meter.getCurrentSetting());
+        Serial.print("Vmon DAC offset : "); Serial.println(level_meter.getVmonOffset());
+
       } else {
         Serial.println("exit without updating FRAM.");
       }
@@ -189,7 +193,7 @@ void loop() {
     break;
   }
   delay(100);
-  serial.println();
+  Serial.println();
 }
 
 char incomming_command(void){
