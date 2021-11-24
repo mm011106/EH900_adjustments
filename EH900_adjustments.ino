@@ -5,12 +5,22 @@
 * @author miyamoto
 * @date 2021/2/9
 * @version 1.0_release
+
+* @date 2021/10/17
+* @version 1.1_release
+
 * @details 
 *   ADコンバータのオフセット、全体としての電圧計測利得の調整、電流設定値の調整
 *   を行い、その結果をFRAMに記録する。
 *   電流計測は、実際に流れている電流を計測器(DMM)で計測し、その値をリファレンスとして補正値を決める。
-*   電圧利得測定は、既知の抵抗（113.74Ω）と同じく既知（調整済み）の電流値から
+*   電圧利得測定は、既知の抵抗（113.74Ω）と、既知（調整済み）の電流値から
 *   リファレンスとなる電圧を計算し、その値と実測値の比率から補正値を求める。
+*   
+*   1.1:
+*     VMON出力用DACのオフセット調整を追加　
+*       0.1V出力設定で実際の値を入力してもらい、オフセット(LSB)を求める
+* 
+* 
 * 
 * @note VSPで通信することを前提としているので、PC側にシリアルコンソール必要
 *   115200bps
@@ -45,9 +55,9 @@ void setup() {
   Serial.println("INIT:--");
   Serial.print("Memory : "); 
   if (level_meter.init()){
-    Serial.print(" -- OK ");
+    Serial.println(" -- OK ");
   } else {
-    Serial.print(" -- Fail..");
+    Serial.println(" -- Fail..");
   };
 
   Serial.print("Meas. Unit : "); 
@@ -61,14 +71,15 @@ void setup() {
   level_meter.setAdcErrComp23(1.0);
   level_meter.setAdcOfsComp01(0);
   level_meter.setAdcOfsComp23(0);
-
+  level_meter.setVmonOffset(0);
+  
   Serial.println("--- EH-900 Adjustment software --- ");
 }
 
 void loop() {
   // if we get a valid byte, read analog ins:
 
-  Serial.println("Wait for command [o|c|g|w]:");
+  Serial.println("Wait for command [o|c|g|v|w]:");
   while (!Serial.available()){delay(100);}
 
   // get incoming byte:
@@ -133,20 +144,30 @@ void loop() {
       }
     break;
 
+    case (int)'v':
+      Serial.println("Vmon Offset voltage ..");
+      Serial.println(" Attach DMM(dc V) to Vmon output , \'g\' if ready to start.");
+      if( incomming_command() == 'g'){
+        meas_vmon_ofs();
+      }
+    break;
+
     case (int)'w':
       Serial.println("Save to Memory");
       level_meter.setTimerPeriod(600);
       level_meter.setSensorLength(20);
       level_meter.setLiquidLevel(0);
       level_meter.setMode(Timer);
-    
+      Serial.println("Please confirm following adjustment parameters");
+
       Serial.print("AD Error Comp 01: "); Serial.println(level_meter.getAdcErrComp01(),8);
       Serial.print("AD Error Comp 23: "); Serial.println(level_meter.getAdcErrComp23(),8);
       Serial.print("AD OFFSET Comp 01: "); Serial.println(level_meter.getAdcOfsComp01());
       Serial.print("AD OFFSET Comp 23: "); Serial.println(level_meter.getAdcOfsComp23());
       Serial.print("Current Source setting: "); Serial.println(level_meter.getCurrentSetting());
+      Serial.print("Vmon DAC offset : "); Serial.println(level_meter.getVmonOffset());
       
-      Serial.print(" \'g\' for store the parameter, or quit without them.:");
+      Serial.print(" \'g\' for store the parameter, \'q\' for quit without update.:");
 
       if( incomming_command() == 'g'){
         Serial.println("");
@@ -160,6 +181,8 @@ void loop() {
         Serial.print("AD OFFSET Comp 01: "); Serial.println(level_meter.getAdcOfsComp01());
         Serial.print("AD OFFSET Comp 23: "); Serial.println(level_meter.getAdcOfsComp23());
         Serial.print("Current Source setting: "); Serial.println(level_meter.getCurrentSetting());
+        Serial.print("Vmon DAC offset : "); Serial.println(level_meter.getVmonOffset());
+
       } else {
         Serial.println("exit without updating FRAM.");
       }
@@ -170,6 +193,7 @@ void loop() {
     break;
   }
   delay(100);
+  Serial.println();
 }
 
 char incomming_command(void){
@@ -227,5 +251,24 @@ void adjust_current(void){
   Serial.print("ADC 2-3 comp :");Serial.println(gain_comp_23,6);
   level_meter.setAdcErrComp23(gain_comp_23);
   level_meter.setCurrentSetting(current_set);
+  return;
+}
+
+void meas_vmon_ofs(void){
+  
+  meas_unit.setVmon(0); // set to 0.1V (= 0%)
+
+  float_t value =  0.0;
+  while ( value < 0.09 || 0.11 < value){
+    Serial.print(" Input DMM(volt-meter) readings[in Volt] :");
+    while(Serial.available()==0){delay(100);}
+    String buf = Serial.readStringUntil(10);
+    Serial.println(buf);
+    value = buf.toFloat();
+  }
+
+  level_meter.setVmonOffset((int16_t)((value-0.10)*26214.0));
+
+  meas_unit.setVmon(0);  //confirm offset corrected VMON output
   return;
 }
