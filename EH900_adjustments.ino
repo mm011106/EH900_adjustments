@@ -9,6 +9,9 @@
 * @date 2021/10/17
 * @version 1.1_release
 
+* @date 2021/11/24
+* @version 1.2_release for Production version
+
 * @details 
 *   ADコンバータのオフセット、全体としての電圧計測利得の調整、電流設定値の調整
 *   を行い、その結果をFRAMに記録する。
@@ -20,7 +23,9 @@
 *     VMON出力用DACのオフセット調整を追加　
 *       0.1V出力設定で実際の値を入力してもらい、オフセット(LSB)を求める
 * 
-* 
+*   1.2:
+*     外部クロックHSEに設定するためのコードを追加　
+*       このバージョン以後は製品版 DR2000195 に対応
 * 
 * @note VSPで通信することを前提としているので、PC側にシリアルコンソール必要
 *   115200bps
@@ -28,6 +33,7 @@
 
 
 #include <Arduino.h>
+#include "EH900_clkConfig.h"
 #include "eh900_class.h"
 #include "eh900_adjust.h"
 
