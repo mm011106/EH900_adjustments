@@ -2,4 +2,6 @@
 *.BUP*
 *.code-workspace
 *.bin
+Output
+.DS_Store
 

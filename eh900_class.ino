@@ -40,7 +40,7 @@ boolean eh900::init(void){
         Serial.print(" .. Sensor Length: "); Serial.println(eh_status.sensor_length);
         Serial.print(" .. Timer period: "); Serial.println(eh_status.timer_period);
         //  初回起動フラグをクリアしておく
-        fram.write8(FRAM_FLAG_ADDR, 1);
+        fram.write(FRAM_FLAG_ADDR, 1);
 
         initSucceed = true;
     } else {
@@ -173,7 +173,7 @@ template <typename T>
 void eh900::nvram_put(uint16_t idx, const T& t){
     const uint8_t* ptr = (const uint8_t *) &t;
     for (int i=0; i < sizeof(t); i++){
-        fram.write8(idx + i, *(ptr + i));
+        fram.write(idx + i, *(ptr + i));
     }
 }
 
@@ -186,6 +186,6 @@ template <typename T>
 void eh900::nvram_get(uint16_t idx, T& t){
     uint8_t* ptr = (uint8_t *) &t;
     for (int i=0; i < sizeof(t); i++){
-        *(ptr + i) = fram.read8(idx + i);
+        *(ptr + i) = fram.read(idx + i);
     }
 }

@@ -5,7 +5,7 @@
 #ifndef _EH900_ADJUST_H_
 #define _EH900_ADJUST_H_
 
-#include <Adafruit_ADS1015.h>   // ADC 16bit diff - 2ch
+#include <Adafruit_ADS1X15.h>   // ADC 16bit diff - 2ch
 #include <Adafruit_MCP23008.h>  // PIO 8bit
 #include <Adafruit_MCP4725.h>   // DAC  12bit 
 #include "DAC80501.h"

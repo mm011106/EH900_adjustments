@@ -155,7 +155,8 @@ boolean Measurement::init(void){
         delete adconverter;
     }
 
-    adconverter = new Adafruit_ADS1115(I2C_ADDR_ADC);
+    // adconverter = new Adafruit_ADS1115(I2C_ADDR_ADC)
+    adconverter = new Adafruit_ADS1115;
     adconverter->begin();
     adconverter->setGain(GAIN_TWO); 
 
